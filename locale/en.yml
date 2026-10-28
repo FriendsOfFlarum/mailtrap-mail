@@ -13,6 +13,8 @@ core:
       mail_mailtrap_inbox_id_help: "Only used in Sandbox mode. It is the number in the inbox's address, e.g. 1234567 in mailtrap.io/inboxes/1234567/messages."
       mail_mailtrap_category_label: Category
       mail_mailtrap_category_help: "Optional. Tags each email so you can filter by it in Mailtrap's email logs and stats, e.g. the forum's name."
+      mail_mailtrap_webhook_signing_secret_label: Webhook signing secret
+      mail_mailtrap_webhook_signing_secret_help: "Optional. Lets Mailtrap report bounces and spam complaints back to the forum. In Mailtrap, add an email sending webhook with the Webhook URL shown below, then paste its signing secret here."
 
 fof-mailtrap-mail:
   admin:

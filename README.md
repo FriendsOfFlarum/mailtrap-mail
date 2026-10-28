@@ -24,6 +24,16 @@ It uses Mailtrap's official PHP SDK and adds a `mailtrap` driver to your forum's
 5. Optionally, set a **Category**.
 6. Make sure the **From** address belongs to your verified sending domain, save, and use **Send Test Mail** to check everything works.
 
+### Bounces and spam complaints
+
+On Flarum 2.1 and later, Mailtrap can tell your forum when an address bounces, is suspended or rejected, or marks your mail as spam. Flarum then flags the member and can stop sending them notification emails. Soft bounces are ignored.
+
+1. On the **Email** page, copy the **Webhook URL** shown under Bounce Handling.
+2. In Mailtrap, add an email sending webhook with that URL, with bounce, suspension, reject and spam complaint events selected.
+3. Paste the webhook's signing secret into **Webhook signing secret** and save.
+
+Bounces are only reported in **Send email** mode. A sandbox delivers nothing, so nothing can bounce.
+
 ### Using a sandbox on staging
 
 Install the extension on your staging forum and choose **Sandbox (testing)** mode. Members' notifications, password resets and digests are all delivered into your Mailtrap inbox, so you can test real forum activity without emailing anyone. On production, use **Send email** mode.
@@ -52,6 +62,7 @@ return [
 | `mode(?string $mode)` | `'sending'` or `'sandbox'`. |
 | `inboxId(int\|string\|null $inboxId)` | The sandbox inbox. |
 | `category(?string $category)` | The category sent with every email. |
+| `webhookSigningSecret(?string $secret)` | The signing secret of the bounce webhook. It is never sent to the admin page. |
 
 A null or empty value pins nothing, so the stored setting still applies. That way `getenv('…') ?: null` falls back to the Email page when the variable isn't set.
 
