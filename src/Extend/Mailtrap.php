@@ -73,6 +73,14 @@ class Mailtrap implements ExtenderInterface
         return $this->pin('mail_mailtrap_category', $category);
     }
 
+    /**
+     * The signing secret of the Mailtrap webhook that reports bounces and spam complaints.
+     */
+    public function webhookSigningSecret(?string $secret): static
+    {
+        return $this->pin('mail_mailtrap_webhook_signing_secret', $secret);
+    }
+
     protected function pin(string $key, int|string|null $value): static
     {
         if ($value !== null && $value !== '') {
