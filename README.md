@@ -13,6 +13,8 @@ It uses Mailtrap's official PHP SDK and adds a `mailtrap` driver to your forum's
 - **Categories.** Tag every email with a category so you can filter by it in Mailtrap's email logs and stats.
 - **Clear errors.** When Mailtrap rejects an email (for example a revoked token or an unverified sending domain), Mailtrap's reason is logged and shown when you use **Send Test Mail**.
 
+Requires Flarum 2.1 or later.
+
 ### Setup
 
 1. In Mailtrap, add and verify your sending domain under **Sending Domains**. You can skip this for sandbox mode.
@@ -23,6 +25,18 @@ It uses Mailtrap's official PHP SDK and adds a `mailtrap` driver to your forum's
    - **Sandbox (testing)** catches mail in a test inbox. Enter the inbox ID, which is the number in the inbox's address, e.g. `1234567` in `mailtrap.io/inboxes/1234567/messages`.
 5. Optionally, set a **Category**.
 6. Make sure the **From** address belongs to your verified sending domain, save, and use **Send Test Mail** to check everything works.
+
+### Bounces and spam complaints
+
+Mailtrap can tell your forum when an address permanently bounces or marks your mail as spam. Flarum then flags the member and can stop sending them notification emails. Soft bounces, suspensions and rejections leave the flag unchanged: suspensions and rejections can be caused by the sending domain or account policy rather than the recipient.
+
+1. On the **Email** page, copy the **Webhook URL** shown under Bounce Handling.
+2. In Mailtrap, add an **Email Sending** webhook with that URL. Select the **Transactional** sending stream, **Payload format: JSON** (the object containing an `events` array), and bounce and spam complaint events.
+3. Paste the webhook's signing secret into **Webhook signing secret** and save. Flarum verifies the signature over the original request body.
+
+Notification suppression is off by default; enable **Stop emailing bounced addresses** to skip flagged members. An administrator can clear a mistaken flag in the edit-user dialog.
+
+Bounces are only reported in **Send email** mode. A sandbox delivers nothing, so nothing can bounce.
 
 ### Using a sandbox on staging
 
@@ -52,6 +66,7 @@ return [
 | `mode(?string $mode)` | `'sending'` or `'sandbox'`. |
 | `inboxId(int\|string\|null $inboxId)` | The sandbox inbox. |
 | `category(?string $category)` | The category sent with every email. |
+| `webhookSigningSecret(?string $secret)` | The signing secret of the bounce webhook. It is never sent to the admin page. |
 
 A null or empty value pins nothing, so the stored setting still applies. That way `getenv('…') ?: null` falls back to the Email page when the variable isn't set.
 

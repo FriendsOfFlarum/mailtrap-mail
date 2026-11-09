@@ -86,6 +86,23 @@ class MailtrapDriverTest extends TestCase
     }
 
     #[Test]
+    public function malformed_webhook_secrets_do_not_disable_sending(): void
+    {
+        $values = ['mail_mailtrap_api_token' => 'token', 'mail_mailtrap_mode' => 'sending',
+            'mail_mailtrap_webhook_signing_secret' => 'not a valid secret'];
+        $this->assertSame([], $this->validate($values)->toArray());
+        $this->assertFalse($this->driver()->webhookConfigured($this->settings($values)));
+    }
+
+    #[Test]
+    public function pasted_signing_secrets_are_trimmed(): void
+    {
+        $this->assertSame('test-secret', $this->driver()->getWebhookSigningSecret($this->settings([
+            'mail_mailtrap_webhook_signing_secret' => " test-secret\n",
+        ])));
+    }
+
+    #[Test]
     public function it_offers_token_mode_inbox_and_category_fields(): void
     {
         $this->assertSame([
@@ -96,6 +113,7 @@ class MailtrapDriverTest extends TestCase
             ],
             'mail_mailtrap_inbox_id' => '',
             'mail_mailtrap_category' => '',
+            'mail_mailtrap_webhook_signing_secret' => '',
         ], $this->driver()->availableSettings());
     }
 

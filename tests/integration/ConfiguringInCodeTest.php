@@ -147,4 +147,14 @@ class ConfiguringInCodeTest extends TestCase
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertStringNotContainsString('pinned-secret-token', (string) $response->getBody());
     }
+    #[Test]
+    public function a_pinned_webhook_secret_is_masked_on_the_admin_page(): void
+    {
+        $this->extend((new Mailtrap())->force()->webhookSigningSecret('pinned-webhook-secret'));
+        $payload = $this->adminPayload();
+        $this->assertContains('mail_mailtrap_webhook_signing_secret', $payload['fof-mailtrap-mail.pinned']);
+        $this->assertSame('••••••••', $payload['settings']['mail_mailtrap_webhook_signing_secret']);
+        $this->assertStringNotContainsString('pinned-webhook-secret', json_encode($payload));
+    }
+
 }
