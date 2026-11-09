@@ -14,7 +14,7 @@ core:
       mail_mailtrap_category_label: Category
       mail_mailtrap_category_help: "Optional. Tags each email so you can filter by it in Mailtrap's email logs and stats, e.g. the forum's name."
       mail_mailtrap_webhook_signing_secret_label: Webhook signing secret
-      mail_mailtrap_webhook_signing_secret_help: "Optional. Lets Mailtrap report bounces and spam complaints back to the forum. In Mailtrap, add an email sending webhook with the Webhook URL shown below, then paste its signing secret here."
+      mail_mailtrap_webhook_signing_secret_help: "Optional, and used only in Send email mode. Add an Email Sending webhook in Mailtrap with payload format JSON and the URL under Bounce Handling, then paste its signing secret here."
 
 fof-mailtrap-mail:
   admin:

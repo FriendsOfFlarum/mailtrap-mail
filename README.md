@@ -13,6 +13,8 @@ It uses Mailtrap's official PHP SDK and adds a `mailtrap` driver to your forum's
 - **Categories.** Tag every email with a category so you can filter by it in Mailtrap's email logs and stats.
 - **Clear errors.** When Mailtrap rejects an email (for example a revoked token or an unverified sending domain), Mailtrap's reason is logged and shown when you use **Send Test Mail**.
 
+Requires Flarum 2.1 or later.
+
 ### Setup
 
 1. In Mailtrap, add and verify your sending domain under **Sending Domains**. You can skip this for sandbox mode.
@@ -26,11 +28,13 @@ It uses Mailtrap's official PHP SDK and adds a `mailtrap` driver to your forum's
 
 ### Bounces and spam complaints
 
-On Flarum 2.1 and later, Mailtrap can tell your forum when an address bounces, is suspended or rejected, or marks your mail as spam. Flarum then flags the member and can stop sending them notification emails. Soft bounces are ignored.
+Mailtrap can tell your forum when an address permanently bounces or marks your mail as spam. Flarum then flags the member and can stop sending them notification emails. Soft bounces, suspensions and rejections leave the flag unchanged: suspensions and rejections can be caused by the sending domain or account policy rather than the recipient.
 
 1. On the **Email** page, copy the **Webhook URL** shown under Bounce Handling.
-2. In Mailtrap, add an email sending webhook with that URL, with bounce, suspension, reject and spam complaint events selected.
-3. Paste the webhook's signing secret into **Webhook signing secret** and save.
+2. In Mailtrap, add an **Email Sending** webhook with that URL. Select the **Transactional** sending stream, **Payload format: JSON** (the object containing an `events` array), and bounce and spam complaint events.
+3. Paste the webhook's signing secret into **Webhook signing secret** and save. Flarum verifies the signature over the original request body.
+
+Notification suppression is off by default; enable **Stop emailing bounced addresses** to skip flagged members. An administrator can clear a mistaken flag in the edit-user dialog.
 
 Bounces are only reported in **Send email** mode. A sandbox delivers nothing, so nothing can bounce.
 

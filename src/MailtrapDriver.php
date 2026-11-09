@@ -59,7 +59,6 @@ class MailtrapDriver implements DriverInterface, HandlesWebhooks
             'mail_mailtrap_mode' => ['required', 'in:sending,sandbox'],
             'mail_mailtrap_inbox_id' => ['nullable', 'required_if:mail_mailtrap_mode,sandbox', 'regex:/^\d+$/'],
             'mail_mailtrap_category' => ['nullable', 'string', 'max:255'],
-            'mail_mailtrap_webhook_signing_secret' => ['nullable', 'regex:/^\S+$/'],
         ])->errors();
     }
 
@@ -90,7 +89,13 @@ class MailtrapDriver implements DriverInterface, HandlesWebhooks
 
     public function getWebhookSigningSecret(SettingsRepositoryInterface $settings): ?string
     {
-        return $settings->get('mail_mailtrap_webhook_signing_secret') ?: null;
+        $secret = trim((string) $settings->get('mail_mailtrap_webhook_signing_secret'));
+
+        if (! $secret || preg_match('/\s/', $secret)) {
+            return null;
+        }
+
+        return $secret;
     }
 
     public function webhookConfigured(SettingsRepositoryInterface $settings): bool
@@ -105,6 +110,8 @@ class MailtrapDriver implements DriverInterface, HandlesWebhooks
 
     public function isPermanentFailure(MailerDeliveryEvent $event): bool
     {
-        return in_array($event->getPayload()['event'] ?? null, ['bounce', 'suspension', 'reject'], true);
+        // Suspension and rejection can be caused by the sending domain or
+        // account policy, rather than a permanent recipient failure.
+        return ($event->getPayload()['event'] ?? null) === 'bounce';
     }
 }
