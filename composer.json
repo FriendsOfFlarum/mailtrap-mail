@@ -22,7 +22,7 @@
         }
     ],
     "require": {
-        "flarum/core": "^2.1",
+        "flarum/core": "2.x-dev",
         "railsware/mailtrap-php": "^3.16",
         "symfony/http-client": "^7.4 || ^8.0",
         "symfony/mailtrap-mailer": "^7.4.12 || ^8.0.12"
