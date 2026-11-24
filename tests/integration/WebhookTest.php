@@ -45,7 +45,7 @@ class WebhookTest extends TestCase
     {
         return ['event' => $type, 'email' => $email, 'message_id' => 'message-1',
             'event_id' => 'event-'.$type.'-'.$email, 'timestamp' => time(), 'reason' => 'Unverified sender',
-            'response' => 'Mailbox /café/ unavailable'];
+            'response' => 'Mailbox /café/ unavailable', 'bounce_category' => 'badrecipient'];
     }
 
     private function body(array $events): string
@@ -105,6 +105,42 @@ class WebhookTest extends TestCase
     public function only_recipient_bounces_and_complaints_flag_users(string $event, bool $flags): void
     {
         $this->assertEquals(200, $this->post($this->body([$this->event($event)]))->getStatusCode());
+        $this->assertSame($flags, User::find(2)->hasBouncedEmail());
+        $this->assertEquals($flags ? 1 : 0, EmailBounceEvent::count());
+        if ($flags) {
+            $this->assertSame($event === 'spam' ? 'complaint' : 'bounce', EmailBounceEvent::firstOrFail()->type);
+        }
+    }
+
+    #[Test]
+    public function signed_malformed_payloads_are_rejected_without_flagging_users(): void
+    {
+        $event = $this->event();
+        unset($event['message_id']);
+        $this->assertEquals(406, $this->post($this->body([$event]))->getStatusCode());
+        $event = $this->event('unknown-event');
+        $this->assertEquals(406, $this->post($this->body([$event]))->getStatusCode());
+        $this->assertEquals(0, EmailBounceEvent::count());
+        $this->assertFalse(User::find(2)->hasBouncedEmail());
+    }
+
+    public static function bounceCategories(): array
+    {
+        return array_map(fn ($category) => [$category, in_array($category, ['badrecipient', 'overquota', 'timeout'], true)], [
+            'badrecipient', 'overquota', 'timeout', 'spam', 'badsender', 'block', 'content', 'dnsFail',
+            'generalfail', 'other', 'relayfail', 'serverfail', 'verifyfail', 'serverpolicy', 'spam_gmail', null,
+        ]);
+    }
+
+    #[Test]
+    #[DataProvider('bounceCategories')]
+    public function sender_policy_bounces_do_not_flag_recipients(?string $category, bool $flags): void
+    {
+        $event = $this->event();
+        $event['bounce_category'] = $category;
+        $event['response'] = '[CS01] Message rejected';
+        $event['response_code'] = 555;
+        $this->assertEquals(200, $this->post($this->body([$event]))->getStatusCode());
         $this->assertSame($flags, User::find(2)->hasBouncedEmail());
         $this->assertEquals($flags ? 1 : 0, EmailBounceEvent::count());
     }

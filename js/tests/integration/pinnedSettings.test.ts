@@ -25,6 +25,7 @@ function mailPage(pinned: string[]) {
   page.driverFields = {
     mailtrap: {
       mail_mailtrap_api_token: '',
+      mail_mailtrap_webhook_signing_secret: '',
       mail_mailtrap_mode: { sending: 'Send email', sandbox: 'Sandbox (testing)' },
       mail_mailtrap_inbox_id: '',
     },
@@ -51,5 +52,23 @@ describe('settings pinned in code', () => {
 
     expect(page.find('input[disabled]')).toHaveLength(0);
     expect(page.find('select[disabled]')).toHaveLength(1);
+  });
+});
+
+describe('webhook signing secret', () => {
+  it('uses a password input', () => {
+    const page = mailPage([]);
+    expect(page.find('input[type="password"][autocomplete="new-password"]')).toHaveLength(1);
+  });
+
+  it('removes a newly saved secret from the client settings and stream', () => {
+    const key = 'mail_mailtrap_webhook_signing_secret';
+    app.data.settings[key] = '0123456789abcdef0123456789abcdef';
+    const page = Object.create(MailPage.prototype) as MailPage;
+    page.settings = {};
+    page.setting(key);
+    page.onsaved();
+    expect(app.data.settings[key]).toBe('••••••••');
+    expect(page.setting(key)()).toBe('••••••••');
   });
 });

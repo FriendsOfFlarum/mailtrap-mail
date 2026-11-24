@@ -28,11 +28,11 @@ Requires Flarum 2.1 or later.
 
 ### Bounces and spam complaints
 
-Mailtrap can tell your forum when an address permanently bounces or marks your mail as spam. Flarum then flags the member and can stop sending them notification emails. Soft bounces, suspensions and rejections leave the flag unchanged: suspensions and rejections can be caused by the sending domain or account policy rather than the recipient.
+Mailtrap can tell your forum when an address permanently bounces or marks your mail as spam. Flarum then flags the member and can stop sending them notification emails. Only hard bounces in Mailtrap’s recipient suppression categories (bad recipient, full mailbox and timeout) flag the address. Soft bounces, sender-policy bounces, suspensions and rejections leave the flag unchanged: suspensions and rejections can be caused by the sending domain or account policy rather than the recipient.
 
 1. On the **Email** page, copy the **Webhook URL** shown under Bounce Handling.
 2. In Mailtrap, add an **Email Sending** webhook with that URL. Select the **Transactional** sending stream, **Payload format: JSON** (the object containing an `events` array), and bounce and spam complaint events.
-3. Paste the webhook's signing secret into **Webhook signing secret** and save. Flarum verifies the signature over the original request body.
+3. Paste the webhook's 32-character hexadecimal signing secret (not a signature from a request) into **Webhook signing secret** and save. The saved secret is masked; leave it unchanged to keep it, replace it to rotate it, or clear it to disable callbacks. Flarum verifies the signature over the original request body.
 
 Notification suppression is off by default; enable **Stop emailing bounced addresses** to skip flagged members. An administrator can clear a mistaken flag in the edit-user dialog.
 

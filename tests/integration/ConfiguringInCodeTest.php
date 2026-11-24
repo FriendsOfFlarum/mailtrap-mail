@@ -148,6 +148,53 @@ class ConfiguringInCodeTest extends TestCase
         $this->assertStringNotContainsString('pinned-secret-token', (string) $response->getBody());
     }
     #[Test]
+    public function a_stored_webhook_secret_never_reaches_the_admin_page_and_a_mask_preserves_it(): void
+    {
+        $secret = '0123456789abcdef0123456789abcdef';
+        $this->setting('mail_mailtrap_webhook_signing_secret', $secret);
+        $response = $this->send($this->request('GET', '/admin', ['authenticatedAs' => 1]));
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertStringNotContainsString($secret, (string) $response->getBody());
+        $this->assertSame('••••••••', $this->adminPayload()['settings']['mail_mailtrap_webhook_signing_secret']);
+        $response = $this->send($this->request('POST', '/api/settings', [
+            'authenticatedAs' => 1,
+            'json' => ['mail_mailtrap_webhook_signing_secret' => '••••••••'],
+        ]));
+        $this->assertEquals(204, $response->getStatusCode());
+        $settings = $this->app()->getContainer()->make(\Flarum\Settings\SettingsRepositoryInterface::class);
+        $this->assertSame($secret, $settings->get('mail_mailtrap_webhook_signing_secret'));
+        $replacement = 'fedcba9876543210fedcba9876543210';
+        $response = $this->send($this->request('POST', '/api/settings', [
+            'authenticatedAs' => 1,
+            'json' => ['mail_mailtrap_webhook_signing_secret' => $replacement],
+        ]));
+        $this->assertEquals(204, $response->getStatusCode());
+        $settings = $this->app()->getContainer()->make(\Flarum\Settings\SettingsRepositoryInterface::class);
+        $this->assertSame($replacement, $settings->get('mail_mailtrap_webhook_signing_secret'));
+        $response = $this->send($this->request('POST', '/api/settings', [
+            'authenticatedAs' => 1,
+            'json' => ['mail_mailtrap_webhook_signing_secret' => ''],
+        ]));
+        $this->assertEquals(204, $response->getStatusCode());
+        $settings = $this->app()->getContainer()->make(\Flarum\Settings\SettingsRepositoryInterface::class);
+        $this->assertSame('', $settings->get('mail_mailtrap_webhook_signing_secret'));
+    }
+
+    #[Test]
+    public function invalid_replacements_do_not_overwrite_a_working_signing_secret(): void
+    {
+        $secret = '0123456789abcdef0123456789abcdef';
+        $this->setting('mail_mailtrap_webhook_signing_secret', $secret);
+        $response = $this->send($this->request('POST', '/api/settings', [
+            'authenticatedAs' => 1,
+            'json' => ['mail_mailtrap_webhook_signing_secret' => str_repeat('a', 64)],
+        ]));
+        $this->assertEquals(422, $response->getStatusCode());
+        $settings = $this->app()->getContainer()->make(\Flarum\Settings\SettingsRepositoryInterface::class);
+        $this->assertSame($secret, $settings->get('mail_mailtrap_webhook_signing_secret'));
+    }
+
+    #[Test]
     public function a_pinned_webhook_secret_is_masked_on_the_admin_page(): void
     {
         $this->extend((new Mailtrap())->force()->webhookSigningSecret('pinned-webhook-secret'));

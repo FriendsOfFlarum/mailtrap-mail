@@ -48,11 +48,7 @@ class MailtrapTransport extends MailtrapSdkTransport
      * Mailtrap accepts one category per email, so one already set on the
      * message (e.g. through MailtrapEmail::category()) wins.
      *
-     * TODO: Once we require flarum/core ^2.0.2, which contains the fix in
-     * https://github.com/flarum/framework/pull/5217, tag each notification
-     * email with its notification type (the blueprint in MessageSending's
-     * data) from a MessageSending listener. Until then, core's MutateEmail
-     * returns true and stops every later listener from running.
+     * TODO: Tag notification emails by their blueprint type.
      */
     protected function applyCategory(SentMessage $message): void
     {

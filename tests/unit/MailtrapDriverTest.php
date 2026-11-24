@@ -95,10 +95,20 @@ class MailtrapDriverTest extends TestCase
     }
 
     #[Test]
+    public function a_signature_or_non_hexadecimal_value_is_not_a_signing_secret(): void
+    {
+        foreach ([str_repeat('a', 64), str_repeat('g', 32), 'test-secret'] as $secret) {
+            $this->assertFalse($this->driver()->webhookConfigured($this->settings([
+                'mail_mailtrap_webhook_signing_secret' => $secret,
+            ])));
+        }
+    }
+
+    #[Test]
     public function pasted_signing_secrets_are_trimmed(): void
     {
-        $this->assertSame('test-secret', $this->driver()->getWebhookSigningSecret($this->settings([
-            'mail_mailtrap_webhook_signing_secret' => " test-secret\n",
+        $this->assertSame('0123456789abcdef0123456789abcdef', $this->driver()->getWebhookSigningSecret($this->settings([
+            'mail_mailtrap_webhook_signing_secret' => " 0123456789abcdef0123456789abcdef\n",
         ])));
     }
 

@@ -23,6 +23,10 @@ return [
     (new Extend\Mail())
         ->driver('mailtrap', MailtrapDriver::class),
 
+    (new Extend\Event())
+        ->listen(\Flarum\Settings\Event\Deserializing::class, Listener\ProtectWebhookSecret::class)
+        ->listen(\Flarum\Settings\Event\Saving::class, Listener\ProtectWebhookSecret::class),
+
     (new Extend\Settings())
         ->default('mail_mailtrap_mode', 'sending'),
 ];

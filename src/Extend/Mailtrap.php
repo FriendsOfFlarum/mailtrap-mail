@@ -74,7 +74,7 @@ class Mailtrap implements ExtenderInterface
     }
 
     /**
-     * The signing secret of the Mailtrap webhook that reports bounces and spam complaints.
+     * The webhook's 32-character hexadecimal signing secret.
      */
     public function webhookSigningSecret(?string $secret): static
     {
