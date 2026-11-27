@@ -23,7 +23,7 @@ use FoF\MailtrapMail\PinnedSettings;
  */
 class AdminPinnedSettings
 {
-    public const SECRETS = ['mail_mailtrap_api_token'];
+    public const SECRETS = ['mail_mailtrap_api_token', 'mail_mailtrap_webhook_signing_secret'];
 
     public const MASK = '••••••••';
 

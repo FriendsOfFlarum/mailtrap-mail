@@ -48,7 +48,7 @@ class MailSettingsTest extends TestCase
 
         $this->assertArrayHasKey('mailtrap', $fields);
         $this->assertSame(
-            ['mail_mailtrap_api_token', 'mail_mailtrap_mode', 'mail_mailtrap_inbox_id', 'mail_mailtrap_category'],
+            ['mail_mailtrap_api_token', 'mail_mailtrap_mode', 'mail_mailtrap_inbox_id', 'mail_mailtrap_category', 'mail_mailtrap_webhook_signing_secret'],
             array_keys($fields['mailtrap'])
         );
         $this->assertSame(['sending', 'sandbox'], array_keys($fields['mailtrap']['mail_mailtrap_mode']));
